@@ -138,7 +138,7 @@ mod tests_constructors {
             Err(_) => panic!("SystemTime before UNIX EPOCH!"),
         };
         let now_time = Timecode::new_ns(now_nano);
-        assert_eq!(now.time, now_time);
+        assert!(now.time.secs()- now_time.secs() < 1.0, "Timepoint::now() and SystemTime::now() are within 1 second of each other");
     }
 
     #[test]

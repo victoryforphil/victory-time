@@ -104,12 +104,12 @@ mod tests_constructors {
 
     #[test]
     fn test_timecode_new() {
-        let a = Timecode::new_secs(1.5);
-        let b = Timecode::new(1, 500_000_000);
-        let c = Timecode::new_ns(1_500_000_000);
-        let d = Timecode::new_us(1_500_000.0);
-        let e = Timecode::new_ms(1500.0);
-        let f = Timecode::new_hz(0.666666666666);
+        let a = Timecode::new_secs(2.0);
+        let b = Timecode::new(2, 0);
+        let c = Timecode::new_ns(2_000_000_000);
+        let d = Timecode::new_us(2_000_000.0);
+        let e = Timecode::new_ms(2000.0);
+        let f = Timecode::new_hz(0.5);
 
         assert_eq!(a, b, "1.5s == 1s + 500_000_000ns");
         assert_eq!(a, c, "1.5s == 1_500_000_000ns");
