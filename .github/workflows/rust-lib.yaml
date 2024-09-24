@@ -7,7 +7,10 @@ on:
   pull_request:
 env:
   CARGO_TERM_COLOR: always
-
+permissions:
+  contents: read
+  actions: read
+  checks: write
 jobs:
   build:
     defaults:
