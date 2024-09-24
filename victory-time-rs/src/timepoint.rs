@@ -138,13 +138,16 @@ mod tests_constructors {
             Err(_) => panic!("SystemTime before UNIX EPOCH!"),
         };
         let now_time = Timecode::new_ns(now_nano);
-        assert!(now.time.secs()- now_time.secs() < 1.0, "Timepoint::now() and SystemTime::now() are within 1 second of each other");
+        assert!(
+            now.time.secs() - now_time.secs() < 1.0,
+            "Timepoint::now() and SystemTime::now() are within 1 second of each other"
+        );
     }
 
     #[test]
     fn test_zero() {
         let zero = Timepoint::zero();
-        let zero_time = Timecode::zero();
+        let zero_time = Timecode::default(); // Should be 0 seconds
         assert_eq!(zero.time, zero_time);
     }
 }
@@ -160,6 +163,14 @@ mod tests_conversions {
         assert_eq!(timepoint.ms(), 1500.0);
         assert_eq!(timepoint.us(), 1_500_000.0);
         assert_eq!(timepoint.ns(), 1_500_000_000);
+    }
+
+    #[test]
+    fn test_conversions_into_timecode() {
+        let time = Timecode::new(1, 500_000_000);
+        let timepoint: Timepoint = time.into();
+
+        assert_eq!(time, timepoint.time);
     }
 }
 

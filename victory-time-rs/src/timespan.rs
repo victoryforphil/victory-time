@@ -64,6 +64,11 @@ impl Timespan {
     pub fn ns(&self) -> u128 {
         self.time.ns()
     }
+
+    pub fn hz(&self) -> f64 {
+        self.time.hz()
+    }
+
     pub fn zero() -> Timespan {
         Timespan {
             time: Timecode::zero(),
@@ -103,10 +108,12 @@ mod tests_constructors {
         let b = Timespan::new_ms(1000.0);
         let c = Timespan::new_us(1_000_000.0);
         let d = Timespan::new_ns(1_000_000_000);
+        let e = Timespan::new_hz(1.0);
 
         assert_eq!(a, b);
         assert_eq!(b, c);
         assert_eq!(c, d);
+        assert_eq!(d, e);
     }
 
     #[test]
@@ -133,5 +140,28 @@ mod tests_duration {
         let b = Timespan::from_duration(a);
         assert_eq!(b.time.secs, 1);
         assert_eq!(b.time.nanos, 0);
+    }
+
+    #[test]
+    fn test_into_duration() {
+        let a = std::time::Duration::new(1, 0);
+        let b: Timespan = a.into();
+        assert_eq!(b.time.secs, 1);
+        assert_eq!(b.time.nanos, 0);
+    }
+}
+
+#[cfg(test)]
+mod tests_conversions {
+    use super::*;
+
+    #[test]
+    fn test_timespan_conversions() {
+        let a = Timespan::new_secs(1.0);
+        assert_eq!(a.secs(), 1.0);
+        assert_eq!(a.ms(), 1000.0);
+        assert_eq!(a.us(), 1_000_000.0);
+        assert_eq!(a.ns(), 1_000_000_000);
+        assert_eq!(a.hz(), 1.0);
     }
 }
