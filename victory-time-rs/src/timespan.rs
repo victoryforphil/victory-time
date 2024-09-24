@@ -1,3 +1,5 @@
+use crate::Timepoint;
+
 use super::Timecode;
 use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
@@ -6,8 +8,12 @@ pub struct Timespan {
 }
 
 impl Timespan {
-    pub fn new(time: Timecode) -> Timespan {
-        Timespan { time }
+    pub fn new(time_duration: Timecode) -> Timespan {
+        Timespan { time: time_duration }
+    }
+
+    pub fn new_points(start: Timepoint, end: Timepoint) -> Timespan {
+        end - start
     }
 
     pub fn new_secs(secs: f64) -> Timespan {

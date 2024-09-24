@@ -1,10 +1,10 @@
-use std::{ops::Add, sync::Arc, time::Instant};
+use std::{ops::{Add, Sub}, sync::Arc, time::{Instant, SystemTime, UNIX_EPOCH}};
 
 use crate::timespan::Timespan;
 
 use super::Timecode;
 use serde::{Deserialize, Serialize};
-pub type TimepointHandle = Arc<Timepoint>;
+
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct Timepoint {
@@ -34,13 +34,18 @@ impl Timepoint {
         Self::new(Timecode::new_us(us))
     }
 
-    pub fn now() -> Timepoint {
-        let now = Instant::now();
-        now.into()
+    pub fn new_ns(ns: u128) -> Timepoint {
+        Self::new(Timecode::new_ns(ns))
     }
 
-    pub fn handle(&self) -> TimepointHandle {
-        Arc::new(self.clone())
+    pub fn now() -> Timepoint {
+        let now_nano = match SystemTime::now().duration_since(SystemTime::UNIX_EPOCH) {
+            Ok(n) => n.as_nanos(),
+            Err(_) => panic!("SystemTime before UNIX EPOCH!"),
+        };
+
+        Timepoint::new(Timecode::new_ns(now_nano))
+
     }
 
     pub fn zero() -> Timepoint {
@@ -71,20 +76,15 @@ impl Add<Timespan> for Timepoint {
     }
 }
 
-impl From<Instant> for Timepoint {
-    fn from(instant: Instant) -> Self {
-        let duration = instant.elapsed();
-        let secs = duration.as_secs();
-        let nanos = duration.subsec_nanos();
-        Timepoint {
-            time: Timecode::new(secs, nanos),
-        }
-    }
-}
+/// Subtract operation.
+/// Timepoint - Timepoint = Timespan
+impl Sub<Timepoint> for Timepoint {
+    type Output = Timespan;
 
-impl From<Arc<Timepoint>> for Timepoint {
-    fn from(handle: Arc<Timepoint>) -> Self {
-        handle.as_ref().clone()
+    fn sub(self, rhs: Timepoint) -> Self::Output {
+        let duration_time = self.time - rhs.time;
+
+        Timespan::new(duration_time)
     }
 }
 
@@ -92,4 +92,18 @@ impl From<Timecode> for Timepoint {
     fn from(time: Timecode) -> Self {
         Timepoint { time }
     }
+}
+
+#[cfg(test)]
+mod tests_constructors {
+    use super::*;
+
+    #[test]
+    fn test_new() {
+        let time = Timecode::new(1, 0);
+        let timepoint = Timepoint::new(time);
+        assert_eq!(timepoint.time, time);
+    }
+
+
 }
