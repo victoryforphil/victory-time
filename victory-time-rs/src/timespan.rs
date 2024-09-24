@@ -9,7 +9,9 @@ pub struct Timespan {
 
 impl Timespan {
     pub fn new(time_duration: Timecode) -> Timespan {
-        Timespan { time: time_duration }
+        Timespan {
+            time: time_duration,
+        }
     }
 
     pub fn new_points(start: Timepoint, end: Timepoint) -> Timespan {
@@ -29,6 +31,10 @@ impl Timespan {
 
     pub fn new_us(us: f64) -> Timespan {
         Self::new(Timecode::new_us(us))
+    }
+
+    pub fn new_ns(ns: u128) -> Timespan {
+        Self::new(Timecode::new_ns(ns))
     }
 
     pub fn from_duration(duration: std::time::Duration) -> Timespan {
@@ -55,6 +61,9 @@ impl Timespan {
         self.time.us()
     }
 
+    pub fn ns(&self) -> u128 {
+        self.time.ns()
+    }
     pub fn zero() -> Timespan {
         Timespan {
             time: Timecode::zero(),
@@ -69,15 +78,60 @@ impl From<std::time::Duration> for Timespan {
 }
 
 #[cfg(test)]
-mod tests {
+mod tests_constructors {
     use super::*;
     #[test]
-    fn test_vic_duration() {
-        let duration = Timespan::new_secs(1.0);
-        assert_eq!(duration.time.secs, 1);
-        assert_eq!(duration.time.nanos, 0);
-        assert_eq!(duration.secs(), 1.0);
-        assert_eq!(duration.ms(), 1000.0);
-        assert_eq!(duration.us(), 1_000_000.0);
+    fn test_new_timespan() {
+        let time = Timecode::new_secs(1.0);
+        let timespan = Timespan::new(time);
+        assert_eq!(timespan.time.secs, 1);
+        assert_eq!(timespan.time.nanos, 0);
+    }
+
+    #[test]
+    fn test_new_points() {
+        let start = Timepoint::new(Timecode::new_secs(1.0));
+        let end = Timepoint::new(Timecode::new_secs(2.0));
+        let timespan = Timespan::new_points(start, end);
+        assert_eq!(timespan.time.secs, 1);
+        assert_eq!(timespan.time.nanos, 0);
+    }
+
+    #[test]
+    fn test_new_conversions() {
+        let a = Timespan::new_secs(1.0);
+        let b = Timespan::new_ms(1000.0);
+        let c = Timespan::new_us(1_000_000.0);
+        let d = Timespan::new_ns(1_000_000_000);
+
+        assert_eq!(a, b);
+        assert_eq!(b, c);
+        assert_eq!(c, d);
+    }
+
+    #[test]
+    fn test_new_zero() {
+        let a = Timespan::zero();
+        assert_eq!(a.time.secs, 0);
+        assert_eq!(a.time.nanos, 0);
+    }
+}
+#[cfg(test)]
+mod tests_duration {
+    use super::*;
+    #[test]
+    fn test_as_duration() {
+        let a = Timespan::new_secs(1.0);
+        let b = a.as_duration();
+        assert_eq!(b.as_secs(), 1);
+        assert_eq!(b.subsec_nanos(), 0);
+    }
+
+    #[test]
+    fn test_from_duration() {
+        let a = std::time::Duration::new(1, 0);
+        let b = Timespan::from_duration(a);
+        assert_eq!(b.time.secs, 1);
+        assert_eq!(b.time.nanos, 0);
     }
 }
